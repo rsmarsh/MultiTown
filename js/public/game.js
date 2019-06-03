@@ -1,3 +1,5 @@
+import Player from './Player.js'
+
 var config = {
   type: Phaser.AUTO,
   width: 800,
@@ -12,11 +14,21 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image('doggy', 'assets/doggy.png');
+  // this.load.image('imageName', 'assets/*.png');
 }
 
 function create() {
-  this.add.image(400, 300, 'doggy');
+  // this.add.image(400, 300, 'imageName');
+  addPlayer.call(this);
 }
 
-function update() {}
+function update() {
+
+}
+
+
+function addPlayer(){
+  var graphics = this.add.graphics();
+  var player1 = new Player('richard', {graphics: graphics});
+
+}

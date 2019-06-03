@@ -17,14 +17,6 @@ var newConnection = function(socket) {
     outputPlayers();
 };
 
-// setup this socket with the basic events for disconnection handling
-var setupBasicEvents = function(socket) {
-    socket.on('disconnect', function(socket) {
-        console.log("user disconnected");
-        userDisconnected(socket.id);
-    });
-}
-
 // attempt to reconnect a user to their previous state
 // this function is called when a playerId was passed along with the socket handshake
 var storeUser = function(playerId, socketId) {
