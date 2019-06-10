@@ -19,7 +19,7 @@ class Player {
     };
 
     addPhysics() {
-        this.player.setBounce(1);
+        this.player.setBounce(0.1);
         this.player.setCollideWorldBounds(true);
         
         // world objects which the player model should interact with
@@ -96,26 +96,63 @@ class Player {
     updatePosition() {
         var keyPressed = this.movementKeys.getKey();
 
-        if (!keyPressed) {
-            return;
-        }
-
+        var newAnim;
         switch(keyPressed) {
             case 'up':
-                console.log("going up");
+                this.jump();
                 break;
+
             case 'down':
-                console.log("going down");
                 break;
+
             case 'left':
-                console.log("going left");
+                newAnim = 'left';
+                this.runDirection('left');
             break;
+
             case 'right':
-                console.log("going right");
+                newAnim = 'right';
+                this.runDirection('right');
             break;
+
+            default: 
+                newAnim = 'turn';
+                this.runDirection('stop');
+                console.error("reached a new anim trigger but the action was not recognised");
         }
 
+        this.changeAnim(newAnim);
+
     };
+
+    // changes the player's sprite to a new animation, such as running left/right
+    // anim is a string value of the animation's key as it named when loaded in
+    changeAnim(anim){
+        this.player.anims.play(anim);
+    };
+
+    runDirection(direction) {
+        if (direction === 'left') {
+            this.player.setVelocityX(-160);
+
+        } else if (direction === 'right') {
+            this.player.setVelocityX(160);
+        } else {
+            this.player.setVelocityX(0);
+        }
+    };
+
+    jump() {
+        if (this.isOnGround()) {
+            this.player.setVelocityY(-330);
+        }
+    };
+
+    isOnGround() {
+        return this.player.body.touching.down;
+    };
+    
+
 }
 
 export default Player;
