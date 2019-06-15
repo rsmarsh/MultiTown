@@ -64,7 +64,9 @@ class Player {
         }
         this.visibleName = this.scene.add.text(0,0, this.name, {
             fontSize: '16px',
-            fill: this.colour || utils.getRandomColour()
+            fill: this.colour || utils.getRandomColour('#'),
+            stroke: '#000000',
+            strokeThickness: 5
         });
         this.visibleName.setOrigin(0.5);
 
