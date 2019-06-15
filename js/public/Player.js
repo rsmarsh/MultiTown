@@ -19,18 +19,17 @@ class Player {
     };
 
     addPhysics() {
-        this.player.setBounce(0.1);
-        this.player.setCollideWorldBounds(true);
+        // this.sprite.setBounce(0.1);
+        this.sprite.setCollideWorldBounds(true);
         
         // world objects which the player model should interact with
         for (var i = 0; i < this.config.collideWith.length; i++) {
-            this.scene.physics.add.collider(this.player, this.config.collideWith[i]);
+            this.scene.physics.add.collider(this.sprite, this.config.collideWith[i]);
         }
-        // this.player.body.setGravityY(100);
     };
     
     addGraphics() {
-        this.player = this.scene.physics.add.sprite(100, 450, 'dude');
+        this.sprite = this.scene.physics.add.sprite(100, 450, 'dude');
         this.scene.anims.create({
             key: 'left',
             frames: this.scene.anims.generateFrameNumbers('dude', {
@@ -57,7 +56,17 @@ class Player {
                 frame: 4
             }],
             frameRate: 20
-        })
+        });
+
+        var onScreenName = this.name.trim();
+        if (onScreenName > 16) {
+            onScreenName = onScreenName.substring(0, 13) + '...';
+        }
+        this.visibleName = this.scene.add.text(0,0, this.name, {
+            fontSize: '16px',
+            fill: this.colour || utils.getRandomColour()
+        });
+        this.visibleName.setOrigin(0.5);
 
     }
 
@@ -97,9 +106,6 @@ class Player {
             }
         };
 
-        // this.movementKeys['up'].addListener('down', this.jump);
-
-
     };
 
     // determine which key press should take priority
@@ -137,42 +143,42 @@ class Player {
             case 'down':
                 break;
 
-
             default: 
                 newAnim = 'turn';
                 this.runDirection('stop');
-                console.error("reached a new anim trigger but the action was not recognised");
         }
 
         this.changeAnim(newAnim);
+        this.visibleName.x = this.sprite.x;
+        this.visibleName.y = this.sprite.y - this.sprite.height/1.5;
 
     };
 
     // changes the player's sprite to a new animation, such as running left/right
     // anim is a string value of the animation's key as it named when loaded in
     changeAnim(anim){
-        this.player.anims.play(anim);
+        this.sprite.anims.play(anim);
     };
 
     runDirection(direction) {
         if (direction === 'left') {
-            this.player.setVelocityX(-160);
+            this.sprite.setVelocityX(-160);
 
         } else if (direction === 'right') {
-            this.player.setVelocityX(160);
+            this.sprite.setVelocityX(160);
         } else {
-            this.player.setVelocityX(0);
+            this.sprite.setVelocityX(0);
         }
     };
 
     jump() {
         if (this.isOnGround()) {
-            this.player.setVelocityY(-330);
+            this.sprite.setVelocityY(-330);
         }
     };
 
     isOnGround() {
-        return this.player.body.touching.down;
+        return this.sprite.body.touching.down;
     };
 
 }
