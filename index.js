@@ -17,7 +17,7 @@ app.use('/assets', express.static(__dirname + '/assets'));
 
 io.on('connection', function(socket){
   console.log('a user connected');
-  playerController.newConnection(socket);
+  playerController.newConnection(socket, io);
 });
 
 http.listen(3000, function(){

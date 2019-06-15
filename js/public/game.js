@@ -14,11 +14,11 @@ var config = {
   scene: {
     preload: preload,
     create: create,
-    update: update
+    update: update,
   }
 };
 
-var game = new Phaser.Game(config);
+window.game = new Phaser.Game(config);
 var currentPlayer;
 
 function preload() {
@@ -44,25 +44,37 @@ function create() {
   platforms.create(50, 250, 'ground');
   platforms.create(750, 220, 'ground');
 
+  socket.on('player-data', addPlayer.bind(this));
+  socket.emit('request-player-data');
   
-  addPlayer.call(this);
 }
 
 function update() {
 
-  // checks for keyboard inputs and moves the player if the necessary keys are down
-  currentPlayer.updatePosition();
+  if (currentPlayer) {
+    // checks for keyboard inputs and moves the player if the necessary keys are down
+    currentPlayer.updatePosition();
+  }
 }
 
 
-function addPlayer(){
+function addPlayer(playerData){
   var sceneRef = this;
   var graphics = this.add.graphics();
-  currentPlayer = new Player('richard', {
+
+  var playerName = playerData.name;
+  // if this is a new player, then no name will exist
+  if (!playerName) {
+    playerName = prompt('What is your name?');
+    socket.emit('player-name-change', playerName);
+  }
+
+  currentPlayer = new Player(playerName, {
     scene: sceneRef,
     graphics: graphics,
     controllable: true,
-    collideWith: [platforms]
+    collideWith: [platforms],
+    position: playerData.position
   });
   
 

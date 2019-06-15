@@ -4,7 +4,6 @@ class Player {
     constructor(name, config) {
         this.name = name;
         this.config = config;
-        // this.graphics = config.graphics;
         
         for (var property in config){
             this[property] = config[property];
@@ -29,12 +28,16 @@ class Player {
     };
     
     addGraphics() {
-        this.sprite = this.scene.physics.add.sprite(100, 450, 'dude');
+        // they may actually be standing at position 0 so watch for false negatives
+        var startingX = !isNaN(this.position.x) ? this.position.x : 100;
+        var startingY = !isNaN(this.position.y) ? this.position.y : 450;
+
+        this.sprite = this.scene.physics.add.sprite(startingX, startingY, 'dude');
         this.scene.anims.create({
             key: 'left',
             frames: this.scene.anims.generateFrameNumbers('dude', {
                 start: 0,
-                end: 0
+                end: 3
             }),
             frameRate: 10,
             repeat: -1
@@ -71,18 +74,6 @@ class Player {
         this.visibleName.setOrigin(0.5);
 
     }
-
-    // creates the onscreen spite to be used by this player
-    createSprite(colour) {
-        // this.colour = this.colour || utils.getRandomColour();
-        // var rect = new Phaser.Geom.Rectangle(50, 50, 50, 50);
-
-        // this.graphics.fillStyle(this.colour);
-        // this.graphics.fillRectShape(rect);
-        
-
-
-    };
 
     addControls() {
         // actions are treated differently to movement keys, since they are single events which won't be held
@@ -137,7 +128,6 @@ class Player {
                 newAnim = 'left';
                 this.runDirection('left');
                 break;
-            
             case 'right':
                 newAnim = 'right';
                 this.runDirection('right');
@@ -153,12 +143,37 @@ class Player {
         this.changeAnim(newAnim);
         this.visibleName.x = this.sprite.x;
         this.visibleName.y = this.sprite.y - this.sprite.height/1.5;
+        this.visibleName.text = this.name;
+        
+        
+        if (this.previousPosition) {
+            if (this.previousPosition.x !== this.sprite.x || this.previousPosition.y !== this.sprite.y) {
+                
+                this.previousPosition.x = this.sprite.x;
+                this.previousPosition.y = this.sprite.y;                
+                
+                //inform the server of the latest position when it changes
+                broadcastPosition({
+                    x: Number(this.sprite.x.toFixed(2)),
+                    y: Number(this.sprite.y.toFixed(2))
+                });
+            }
+        } else {
+            this.previousPosition = {
+                x: this.sprite.x,
+                y: this.sprite.y
+            };
+        }
 
     };
 
     // changes the player's sprite to a new animation, such as running left/right
     // anim is a string value of the animation's key as it named when loaded in
     changeAnim(anim){
+    
+        if (this.sprite.anims.currentAnim && this.sprite.anims.currentAnim.key === anim){ 
+            return;
+        }
         this.sprite.anims.play(anim);
     };
 
