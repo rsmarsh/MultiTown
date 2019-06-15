@@ -74,46 +74,69 @@ class Player {
     };
 
     addControls() {
+        // actions are treated differently to movement keys, since they are single events which won't be held
+        this.scene.input.keyboard.on('keydown_W', function(){
+            this.jump();
+        }, this)
+
+
         this.movementKeys = {
-            'up': this.scene.input.keyboard.addKey('W'),
+            // 'up': this.scene.input.keyboard.addKey('W'),
             'down': this.scene.input.keyboard.addKey('S'),
             'left': this.scene.input.keyboard.addKey('A'),
             'right': this.scene.input.keyboard.addKey('D'),
-            getKey: () => {
-                // iterate over each key object and return the first result
+            getKeys: () => {
+                var keys = [];
+                // iterate over each key object and return an array of the currently pressed keys
                 for (var key in this.movementKeys) {
                     if (this.movementKeys[key].isDown) {
-                        return key;
+                        keys.push(key);
                     }
                 }
+                return keys;
             }
         };
+
+        // this.movementKeys['up'].addListener('down', this.jump);
 
 
     };
 
+    // determine which key press should take priority
+    determineAction(keysPressed) {
+        // don't prioritise one direction
+        if (keysPressed.includes('left') && keysPressed.includes('right')) {
+            return 'still';
+        }
+
+        if (keysPressed.includes('left')) {
+            return 'left';
+        }
+
+        if (keysPressed.includes('right')) {
+            return 'right';
+        }
+    };
+
     // called each frame by the game's update loop
     updatePosition() {
-        var keyPressed = this.movementKeys.getKey();
+        var keysPressed = this.movementKeys.getKeys();
+        var action = this.determineAction(keysPressed);
 
         var newAnim;
-        switch(keyPressed) {
-            case 'up':
-                this.jump();
-                break;
-
-            case 'down':
-                break;
-
+        switch(action) {
             case 'left':
                 newAnim = 'left';
                 this.runDirection('left');
-            break;
-
+                break;
+            
             case 'right':
                 newAnim = 'right';
                 this.runDirection('right');
-            break;
+                break;
+            case 'down':
+                break;
+
 
             default: 
                 newAnim = 'turn';
@@ -151,7 +174,6 @@ class Player {
     isOnGround() {
         return this.player.body.touching.down;
     };
-    
 
 }
 
