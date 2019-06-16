@@ -38,15 +38,15 @@ var storeUser = function(playerId, socketId) {
     playerList[playerId].socketId = socketId;
     playerList[playerId].lastConnected = new Date().getUTCMilliseconds();
     playerList[playerId].connectionCount += 1; 
+
+
+
 };
 
-// inform the user what their playerId is, so that if they leave and return they can reconnect
-var returnUserCredentials = function(playerId) {
-
-}
-
 var userDisconnected = function(playerId) {
-    playerList[playerId].online = false;
+    if (playerList[playerId]) {
+        playerList[playerId].online = false;
+    }
 };
 
 var outputPlayers = function() {
@@ -70,6 +70,7 @@ var getPlayerData = function(playerId) {
     }
 };
 
+// returns info to the client about their saved data
 var sendPlayerData = function(playerId, socket, ioRespond) {
  // get all the info needed for the player to spawn
  var playerData = getPlayerData(playerId);
@@ -80,8 +81,17 @@ var sendPlayerData = function(playerId, socket, ioRespond) {
 
 setUpSocketEvents = function(socket, ioRespond) {
     var playerId = getPlayerIdFromSocketId(socket.id);
+    
+    // user has closed/ended the websocket session
+    socket.on('disconnect', userDisconnected.bind(this, playerId));
+    
+    // a new x/y coordinate has received from a single player
     socket.on('pos', storePlayerPosition.bind(this, playerId));
+
+    // a client requesting their data from a previous session
     socket.on('request-player-data', sendPlayerData.bind(this, playerId, socket, ioRespond));
+
+    // the user is changing, or setting their name for the first time
     socket.on('player-name-change', storePlayerName.bind(this, playerId));
 };
 
@@ -95,8 +105,25 @@ var storePlayerPosition = function(playerId, position) {
 // this could be a new player's name, or an existing player changing their name
 var storePlayerName = function(playerId, newName) {
     playerList[playerId].name = newName;
-}
+};
+
+var getPlayerList = function() {
+    var strippedList = [];
+    for (var player in playerList) {
+        // only need players who are online
+        if (!playerList[player].online) {
+            continue;
+        }
+        strippedList.push({
+            name: playerList[player].name,
+            position: playerList[player].position,
+            colour: playerList[player].colour
+        });
+    }
+    return strippedList;
+};
 
 module.exports = {
-    newConnection: newConnection
+    newConnection: newConnection,
+    getPlayerList: getPlayerList
 };

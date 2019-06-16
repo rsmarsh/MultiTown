@@ -1,4 +1,5 @@
-import Player from './Player.js'
+import Player from './Player.js';
+
 
 var config = {
   type: Phaser.AUTO,
@@ -43,9 +44,8 @@ function create() {
   platforms.create(600, 400, 'ground');
   platforms.create(50, 250, 'ground');
   platforms.create(750, 220, 'ground');
-
-  socket.on('player-data', addPlayer.bind(this));
-  socket.emit('request-player-data');
+  
+  addSocketComms.call(this, socket);
   
 }
 
@@ -63,9 +63,13 @@ function addPlayer(playerData){
   var graphics = this.add.graphics();
 
   var playerName = playerData.name;
+
   // if this is a new player, then no name will exist
   if (!playerName) {
-    playerName = prompt('What is your name?');
+    // prevent blank/space names
+    while (!playerName) {
+      playerName = prompt('What is your name?');
+    }
     socket.emit('player-name-change', playerName);
   }
 
@@ -76,6 +80,24 @@ function addPlayer(playerData){
     collideWith: [platforms],
     position: playerData.position
   });
-  
 
 }
+
+
+function addSocketComms(socket) {
+  socket.on('player-data', addPlayer.bind(this));
+
+  // receive a list of all other players
+  socket.on('player-list', updatePlayerPositions.bind(this));
+  
+  // receive the positions of all other players
+  socket.on('player-positions', updatePlayerPositions.bind(this));
+
+  socket.emit('request-player-data');
+}
+
+// receives a list of players and their latest positions from the server
+function updatePlayerPositions(playerList) {
+  console.log("received a player list as");
+  console.log(playerList);
+};
