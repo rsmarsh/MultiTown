@@ -3,8 +3,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-var playerList = require('./private/PlayerList.js');
-var playerController = require('./private/player-controller.js');
+var Player = require('./private/Player.js');
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -17,16 +16,27 @@ app.use('/assets', express.static(__dirname + '/assets'));
 
 
 io.on('connection', function(socket){
-  console.log('a user connected');
-  playerController.newConnection(socket, io);
-  
-  // a new client will request an up to date list of all the currently active players
-  socket.on('request-player-data', function() {
-    
-    // inform the new connection about the current list of players
-    io.to(socket.id).emit('player-list', playerController.getPlayerList());
+  var player = new Player(socket);
+  socket.player = player;
+
+  // wait until the client gives the load complete signal
+  socket.on('game-loaded', function() {
+      io.to(socket.id).emit('player-data', socket.player.getPrivateInfo());
+      io.to(socket.id).emit('player-list', socket.player.getAllPlayerStates(true));
+      socket.player.setInitialised(true);
   });
-  
+
+  socket.on('pos', function(position) {
+    socket.player.updatePosition(position);
+    socket.broadcast.emit('player-positions', socket.player.getAllPlayerStates(false));
+  });
+
+  socket.on('disconnect', function() {
+    // if (player.isInitialised() === false) {
+      socket.player.removePlayer();
+    // }
+  });
+
 });
 
 

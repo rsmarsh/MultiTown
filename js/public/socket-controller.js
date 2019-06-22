@@ -9,27 +9,10 @@ if (localStorage) {
     connQuery 
 } 
 
-var socket = io('', {query: connQuery});
-
-// receive info about user ID and store it to take care of returning users
-// socket.on('player-data', initialisePlayer);
-
-// receives the player ID which can be used to inform the server who the user is
-// this assists with returning users allowing the server to reload their previous game info
-function storeSessionInfo(playerId) {
-    if (localStorage) {
-        localStorage.setItem('playerId', playerId);
-    }
-};
-
-function initialisePlayer(playerData) {
-    console.log("received player data from server");
-    console.log(playerData);
-    if (playerData.playerId) {
-        storeSessionInfo(playerData.playerId);
-    }
-    // addPlayer(playerData.position);
-};
+var socket = io('', {
+    query: connQuery,
+    reconnection: false
+});
 
 function broadcastPosition(position) {
     socket.emit('pos', position);

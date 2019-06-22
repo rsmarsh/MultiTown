@@ -11,9 +11,11 @@ class Player {
 
         this.addGraphics();
         this.addPhysics();
-
+        
         if (this.controllable) {
             this.addControls();
+        } else {
+            this.sprite.body.gravity.y = -300;
         }
     };
 
@@ -117,8 +119,23 @@ class Player {
         }
     };
 
+    // this is used when online players are moving around, since they are just a sprite and do not require usual phaser calculations
+    manuallyUpdatePosition(newData) {
+        this.sprite.x = newData.position.x;
+        this.sprite.y = newData.position.y;
+
+        this.updateFloatingName(this.sprite.x, this.sprite.y - this.sprite.height/1.5, newData.name);
+    }
+
     // called each frame by the game's update loop
     updatePosition() {
+
+        this.updateFloatingName(this.sprite.x, this.sprite.y - this.sprite.height/1.5, this.name);
+
+        if (!this.controllable) {
+            return;
+        }
+       
         var keysPressed = this.movementKeys.getKeys();
         var action = this.determineAction(keysPressed);
 
@@ -141,10 +158,6 @@ class Player {
         }
 
         this.changeAnim(newAnim);
-        this.visibleName.x = this.sprite.x;
-        this.visibleName.y = this.sprite.y - this.sprite.height/1.5;
-        this.visibleName.text = this.name;
-        
         
         if (this.previousPosition) {
             if (this.previousPosition.x !== this.sprite.x || this.previousPosition.y !== this.sprite.y) {
@@ -165,6 +178,12 @@ class Player {
             };
         }
 
+    };
+
+    updateFloatingName(newX, newY, name) {
+        this.visibleName.x = newX;
+        this.visibleName.y = newY;
+        this.visibleName.text = name;
     };
 
     // changes the player's sprite to a new animation, such as running left/right

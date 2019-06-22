@@ -20,7 +20,9 @@ var config = {
 };
 
 window.game = new Phaser.Game(config);
+
 var currentPlayer;
+var onlinePlayers = {};
 
 function preload() {
   this.load.image('sky', 'assets/env/sky.png');
@@ -46,6 +48,7 @@ function create() {
   platforms.create(750, 220, 'ground');
   
   addSocketComms.call(this, socket);
+  requestPlayerData.call(this, socket);
   
 }
 
@@ -57,15 +60,44 @@ function update() {
   }
 }
 
+function updateOnlinePlayers(playerList){
+  for (var i = 0; i < playerList.length; i++) {
+    // use the safeId to identify which character needs to move
+    var onlinePlayer = onlinePlayers[playerList[i].safeId];
 
-function addPlayer(playerData){
+    // ensure that this is not a new player who has joined since this user connected
+    if (onlinePlayer) {
+      onlinePlayer.manuallyUpdatePosition(playerList[i]);
+    }
+    
+  }
+};
+
+
+function receivePlayerInfo(playerData) {
+  if (localStorage) {
+    // update/store the player ID for this character
+    localStorage.setItem('playerId', playerData.playerId);
+  }
+
+  addPlayer.call(this, playerData);
+};
+
+function receiveOnlinePlayerList(playerList) {
+  for (var i = 0; i < playerList.length; i++) {
+    onlinePlayers[playerList[i].safeId] = addPlayer.call(this, playerList[i], true);
+  }
+};
+
+// otherPlayer refers to whether this is the current user, or other online players
+function addPlayer(playerData, otherPlayer){
   var sceneRef = this;
   var graphics = this.add.graphics();
 
   var playerName = playerData.name;
 
   // if this is a new player, then no name will exist
-  if (!playerName) {
+  if (!otherPlayer && !playerName) {
     // prevent blank/space names
     while (!playerName) {
       playerName = prompt('What is your name?');
@@ -73,27 +105,37 @@ function addPlayer(playerData){
     socket.emit('player-name-change', playerName);
   }
 
-  currentPlayer = new Player(playerName, {
+  var newPlayer = new Player(playerName, {
     scene: sceneRef,
     graphics: graphics,
-    controllable: true,
+    controllable: !otherPlayer,
     collideWith: [platforms],
     position: playerData.position
   });
+
+  if (!otherPlayer) {
+    currentPlayer = newPlayer;
+  }
+
+  return newPlayer;
 
 }
 
 
 function addSocketComms(socket) {
-  socket.on('player-data', addPlayer.bind(this));
+  socket.on('player-data', receivePlayerInfo.bind(this));
 
   // receive a list of all other players
-  socket.on('player-list', updatePlayerPositions.bind(this));
+  socket.on('player-list', receiveOnlinePlayerList.bind(this));
   
   // receive the positions of all other players
-  socket.on('player-positions', updatePlayerPositions.bind(this));
+  socket.on('player-positions', updateOnlinePlayers.bind(this));
 
-  socket.emit('request-player-data');
+}
+
+function requestPlayerData(socket) {
+  // inform the server that the game has fully loaded
+  socket.emit('game-loaded');
 }
 
 // receives a list of players and their latest positions from the server
