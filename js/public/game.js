@@ -35,17 +35,20 @@ function preload() {
     );
 }
 
-var platforms;
+var platformsGroup;
+var playersGroup;
 
 function create() {
   this.add.image(400, 300, 'sky');
   
-  platforms = this.physics.add.staticGroup();
+  platformsGroup = this.physics.add.staticGroup();
+  playersGroup = this.physics.add.group();
+
   
-  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-  platforms.create(600, 400, 'ground');
-  platforms.create(50, 250, 'ground');
-  platforms.create(750, 220, 'ground');
+  platformsGroup.create(400, 568, 'ground').setScale(2).refreshBody();
+  platformsGroup.create(600, 400, 'ground');
+  platformsGroup.create(50, 250, 'ground');
+  platformsGroup.create(750, 220, 'ground');
   
   addSocketComms.call(this, socket);
   requestPlayerData.call(this, socket);
@@ -120,7 +123,8 @@ function addPlayer(playerData, otherPlayer){
     scene: sceneRef,
     graphics: graphics,
     controllable: !otherPlayer,
-    collideWith: [platforms],
+    physicsGroup: playersGroup,
+    collideWith: [platformsGroup, playersGroup],
     position: playerData.position
   });
 

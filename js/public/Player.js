@@ -20,8 +20,12 @@ class Player {
     };
 
     addPhysics() {
-        // this.sprite.setBounce(0.1);
         this.sprite.setCollideWorldBounds(true);
+        this.sprite.setImmovable(true);
+
+        if (this.controllable) {
+            this.physicsGroup.add(this.sprite);
+        }
         
         // world objects which the player model should interact with
         for (var i = 0; i < this.config.collideWith.length; i++) {
