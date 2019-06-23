@@ -94,7 +94,7 @@ Player.prototype = {
     // returns safe info about this player
     // contains game data and public facing data
     getPublicInfo: function() {
-        return 'this is '+this.gameData.name;
+        return this.gameData;
     },  
 
     getAllPlayerStates: function(excludeSelf) {

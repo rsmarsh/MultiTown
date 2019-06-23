@@ -73,6 +73,10 @@ function updateOnlinePlayers(playerList){
   }
 };
 
+function onlinePlayerLeft(playerData) {
+  onlinePlayers[playerData.safeId].destroyPlayer();
+};
+
 
 function receivePlayerInfo(playerData) {
   if (localStorage) {
@@ -83,10 +87,17 @@ function receivePlayerInfo(playerData) {
   addPlayer.call(this, playerData);
 };
 
+
+// receive a list of one or more other players who were already online when this client joined
 function receiveOnlinePlayerList(playerList) {
   for (var i = 0; i < playerList.length; i++) {
     onlinePlayers[playerList[i].safeId] = addPlayer.call(this, playerList[i], true);
   }
+};
+
+// get the data of one other user, who will have joined since this client
+function receiveOnlinePlayerInfo(playerData) {
+  onlinePlayers[playerData.safeId] = addPlayer.call(this, playerData, true);
 };
 
 // otherPlayer refers to whether this is the current user, or other online players
@@ -127,6 +138,11 @@ function addSocketComms(socket) {
 
   // receive a list of all other players
   socket.on('player-list', receiveOnlinePlayerList.bind(this));
+
+  // receive subsequent players after joining
+  socket.on('new-online-player', receiveOnlinePlayerInfo.bind(this));
+
+  socket.on('player-left', onlinePlayerLeft.bind(this));
   
   // receive the positions of all other players
   socket.on('player-positions', updateOnlinePlayers.bind(this));

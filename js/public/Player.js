@@ -103,6 +103,11 @@ class Player {
 
     };
 
+    destroyPlayer() {
+        this.visibleName.destroy();
+        this.sprite.destroy();
+    };
+
     // determine which key press should take priority
     determineAction(keysPressed) {
         // don't prioritise one direction

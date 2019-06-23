@@ -23,6 +23,10 @@ io.on('connection', function(socket){
   socket.on('game-loaded', function() {
       io.to(socket.id).emit('player-data', socket.player.getPrivateInfo());
       io.to(socket.id).emit('player-list', socket.player.getAllPlayerStates(true));
+
+      // broadcast the new player's info to all existing players
+      socket.broadcast.emit('new-online-player', socket.player.getPublicInfo());
+      
       socket.player.setInitialised(true);
   });
 
@@ -32,9 +36,10 @@ io.on('connection', function(socket){
   });
 
   socket.on('disconnect', function() {
-    // if (player.isInitialised() === false) {
+    if (player.isInitialised() === false) {
       socket.player.removePlayer();
-    // }
+    }
+    socket.broadcast.emit('player-left', socket.player.getPublicInfo());
   });
 
 });

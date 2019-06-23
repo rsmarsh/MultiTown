@@ -4,17 +4,6 @@ var list = {};
 
 var addPlayer = function(playerInstance) {
     list[playerInstance.playerId] = playerInstance 
-    // {
-    //     playerId: playerInfo.playerId,
-    //     safeId: playerInfo.gameData.safeId,
-    //     name: playerInfo.gameData.name,
-    //     position: playerInfo.gameData.position,
-    //     colour: playerInfo.gameData.colour,
-    //     online: playerInfo.online,
-    //     socketId: playerInfo.socketId,
-    //     lastConnected: playerInfo.lastConnected,
-    //     connectionCount: playerInfo.connectionCount
-    // };
 };
 
 // A connecting user provided a playerId, check if it matches any of the stored users
@@ -45,13 +34,7 @@ var getAllPlayerStates = function(excludeId) {
             });
         }
     }
-    if (strippedList[0]) {
 
-        console.log('0: '+strippedList[0].position.x);
-    }
-    if (strippedList[1]) {
-        console.log('1: '+strippedList[1].position.x);
-    }
     return strippedList;
 };
 
