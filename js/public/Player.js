@@ -63,6 +63,9 @@ class Player {
             frameRate: 20
         });
 
+        // this is the default player animation
+        this.changeAnim('turn');
+
         var onScreenName = this.name.trim();
         if (onScreenName > 16) {
             onScreenName = onScreenName.substring(0, 13) + '...';
@@ -128,6 +131,7 @@ class Player {
     manuallyUpdatePosition(newData) {
         this.sprite.x = newData.position.x;
         this.sprite.y = newData.position.y;
+        this.changeAnim(newData.anim);
 
         this.updateFloatingName(this.sprite.x, this.sprite.y - this.sprite.height/1.5, newData.name);
     }
@@ -173,7 +177,8 @@ class Player {
                 //inform the server of the latest position when it changes
                 broadcastPosition({
                     x: Number(this.sprite.x.toFixed(2)),
-                    y: Number(this.sprite.y.toFixed(2))
+                    y: Number(this.sprite.y.toFixed(2)),
+                    anim: newAnim
                 });
             }
         } else {

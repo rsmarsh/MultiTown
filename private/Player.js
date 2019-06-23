@@ -50,6 +50,7 @@ Player.prototype = {
     updatePosition: function(position) {
         this.gameData.position.x = position.x;
         this.gameData.position.y = position.y;
+        this.gameData.anim = position.anim;
     },
 
     getPosition: function(){

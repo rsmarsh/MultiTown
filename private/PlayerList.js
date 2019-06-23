@@ -30,6 +30,7 @@ var getAllPlayerStates = function(excludeId) {
                 safeId: list[player].gameData.safeId,
                 name: list[player].gameData.name,
                 position: list[player].getPosition(),
+                anim: list[player].gameData.anim,
                 colour: list[player].gameData.colour
             });
         }
