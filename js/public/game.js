@@ -60,7 +60,7 @@ function update() {
   }
 }
 
-function updateOnlinePlayers(playerList){
+function updateOnlinePlayerPositions(playerList){
   for (var i = 0; i < playerList.length; i++) {
     // use the safeId to identify which character needs to move
     var onlinePlayer = onlinePlayers[playerList[i].safeId];
@@ -145,7 +145,7 @@ function addSocketComms(socket) {
   socket.on('player-left', onlinePlayerLeft.bind(this));
   
   // receive the positions of all other players
-  socket.on('player-positions', updateOnlinePlayers.bind(this));
+  socket.on('player-positions', updateOnlinePlayerPositions.bind(this));
 
 }
 
