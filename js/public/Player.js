@@ -67,7 +67,7 @@ class Player {
         if (onScreenName > 16) {
             onScreenName = onScreenName.substring(0, 13) + '...';
         }
-        this.visibleName = this.scene.add.text(0,0, this.name, {
+        this.visibleName = this.scene.add.text(this.sprite.x, this.sprite.y - this.sprite.height/1.5, this.name, {
             fontSize: '16px',
             fill: this.colour || utils.getRandomColour('#'),
             stroke: '#000000',
