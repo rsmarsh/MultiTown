@@ -24,19 +24,10 @@ var Player = function(socket) {
         this.gameData = this.generateGameData();
     }
 
-
-
-    // This player could either be a returning player, or a new player
-    this.gameData.name = this.name || 'no name'+crypto.randomBytes(3).toString('hex');;
-
-
     this.connect();
 
-    
     PlayerList.addPlayer(this);
     
-
-
 };
 
 Player.prototype = {
