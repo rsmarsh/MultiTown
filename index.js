@@ -39,6 +39,7 @@ io.on('connection', function(socket){
     if (player.isInitialised() === false) {
       socket.player.removePlayer();
     }
+    socket.player.disconnect();
     socket.broadcast.emit('player-left', socket.player.getPublicInfo());
   });
 

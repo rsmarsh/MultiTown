@@ -153,9 +153,3 @@ function requestPlayerData(socket) {
   // inform the server that the game has fully loaded
   socket.emit('game-loaded');
 }
-
-// receives a list of players and their latest positions from the server
-function updatePlayerPositions(playerList) {
-  console.log("received a player list as");
-  console.log(playerList);
-};
