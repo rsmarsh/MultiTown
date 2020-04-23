@@ -1,4 +1,4 @@
-var crypto = require('crypto');
+const utils = require('./utils');
 var PlayerList = require('./PlayerList.js');
 
 // the Player constructor creates a single player object, storing all the relevant user information
@@ -12,7 +12,7 @@ var Player = function(socket) {
 
     // if a playerId was provided by the connecting user, check to see if they have a record
     var returningPlayer = socket.handshake.query.playerId && PlayerList.checkPlayerExists(socket.handshake.query.playerId);
-
+    console.log(`ID: ${socket.handshake.query.playerId}`);
     if (returningPlayer) {
         console.log("returning player");
         this.playerId = socket.handshake.query.playerId;
@@ -20,8 +20,14 @@ var Player = function(socket) {
 
     } else {
         console.log("brand new player");
-        this.playerId = crypto.randomBytes(20).toString('hex');
+        this.playerId = utils.getRandomString();
         this.gameData = this.generateGameData();
+    }
+
+    // if this player is joining but is already online, there must have been a disconnection or they have multiple tabs open
+    if (this.isOnline()) {
+        // force a disconnect before reconnecting
+        this.disconnect();
     }
 
     this.connect();
@@ -44,6 +50,7 @@ Player.prototype = {
     disconnect: function() {
         console.log(this.gameData.name+" disconnected");
         this.online = false;
+        this.socket.broadcast.emit('player-left', this.getPublicInfo());
     },
 
     // a new position was received by the client, store the latest x/y coordinates
@@ -63,7 +70,7 @@ Player.prototype = {
     // generates the minimal basic info required for a brand new player
     generateGameData: function() {
         return {
-            safeId: crypto.randomBytes(20).toString('hex'),
+            safeId: utils.getRandomString(20),
             name: 'guest'+(PlayerList.getPlayerCount()+1),
             position: {
                 x: 100,

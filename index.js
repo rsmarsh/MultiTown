@@ -2,7 +2,11 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 1234;
+const utils = require('./private/utils');
+
+// A new random session ID each instance, so that rejoining players can have local data nullified
+const sessionId = utils.getRandomString(16);
 
 var Player = require('./private/Player.js');
 
@@ -22,6 +26,9 @@ io.on('connection', function(socket){
 
   // wait until the client gives the load complete signal
   socket.on('game-loaded', function() {
+      io.to(socket.id).emit('session-data', {
+        sessionId
+      });
       io.to(socket.id).emit('player-data', socket.player.getPrivateInfo());
       io.to(socket.id).emit('player-list', socket.player.getAllPlayerStates(true));
 
@@ -41,7 +48,6 @@ io.on('connection', function(socket){
       socket.player.removePlayer();
     }
     socket.player.disconnect();
-    socket.broadcast.emit('player-left', socket.player.getPublicInfo());
   });
 
 });

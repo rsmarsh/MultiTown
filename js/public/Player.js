@@ -4,6 +4,8 @@ class Player {
     constructor(name, config) {
         this.name = name;
         this.config = config;
+        this.banned = false;
+        
         
         for (var property in config){
             this[property] = config[property];
@@ -89,10 +91,12 @@ class Player {
         this.scene.input.keyboard.on('keydown_W', function(){
             this.jump();
         }, this)
+		this.scene.input.keyboard.on('keydown_SPACE', function(){
+            this.jump();
+        }, this)
 
 
         this.movementKeys = {
-            // 'up': this.scene.input.keyboard.addKey('W'),
             'down': this.scene.input.keyboard.addKey('S'),
             'left': this.scene.input.keyboard.addKey('A'),
             'right': this.scene.input.keyboard.addKey('D'),
@@ -111,8 +115,12 @@ class Player {
     };
 
     destroyPlayer() {
+        this.banned = true;
         this.visibleName.destroy();
         this.sprite.destroy();
+        if (this.config.isLocalUser === true) {
+            this.config.worldObject.onScreenMessage("Multiple tabs detected. Get out", 9999);
+        }
     };
 
     // determine which key press should take priority
@@ -142,7 +150,6 @@ class Player {
 
     // called each frame by the game's update loop
     updatePosition() {
-
         this.updateFloatingName(this.sprite.x, this.sprite.y - this.sprite.height/1.5, this.name);
 
         if (!this.controllable) {

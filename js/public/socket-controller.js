@@ -6,7 +6,6 @@ if (localStorage) {
     if (playerId) {
         connQuery+='playerId='+playerId;
     }
-    connQuery 
 } 
 
 var socket = io('', {
