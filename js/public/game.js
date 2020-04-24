@@ -127,7 +127,7 @@ function receiveOnlinePlayerInfo(playerData) {
     // is this a player on two tabs, or one that disconnected and rejoined
     if (onlinePlayers[playerData.safeId] === currentPlayer.safeId) {
         // destroy the existing instance of this player
-        currentPlayer.destroyPlayer();
+        // currentPlayer.destroyPlayer();
     }
     onlinePlayers[playerData.safeId] = addPlayer.call(this, playerData, true);
 };
