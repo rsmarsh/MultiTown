@@ -1,15 +1,30 @@
 import * as utils from './utilities.js';
+import Inventory from './Inventory.js';
+import Weapon from './Weapon.js';
 
 class Player {
     constructor(name, config) {
         this.name = name;
         this.config = config;
         this.banned = false;
+        this.itemInHand;
         
         
         for (var property in config){
             this[property] = config[property];
         }
+
+        var starterGun = new Weapon({
+            name: "starterGun",
+            damage: 10,
+            spritesheet: null,
+            soundList: []
+        });
+        this.inventory = new Inventory({
+            items: {
+                "1": starterGun
+            }
+        });
 
         this.addGraphics();
         this.addPhysics();
@@ -94,6 +109,15 @@ class Player {
 		this.scene.input.keyboard.on('keydown_SPACE', function(){
             this.jump();
         }, this)
+
+
+        // Inventory slots
+        this.scene.input.keyboard.on('keydown_ONE', this.inventoryKeyPressed);
+        this.scene.input.keyboard.on('keydown_TWO', this.inventoryKeyPressed);
+        this.scene.input.keyboard.on('keydown_THREE', this.inventoryKeyPressed);
+        this.scene.input.keyboard.on('keydown_FOUR', this.inventoryKeyPressed);
+        this.scene.input.on('pointerdown', this.primaryFirePressed);
+
 
 
         this.movementKeys = {
@@ -235,7 +259,31 @@ class Player {
     };
 
     isOnGround() {
-        return this.sprite.body.touching.down;
+        return this.sprite.body.touching.down || this.sprite.body.blocked.down;
+    };
+
+    inventoryKeyPressed = (itemKey) => {
+        if (this.inventory.isSlotEmpty(itemKey.key)) {
+            return;
+        }
+        let item = this.inventory.retrieveItem(itemKey.key);
+
+        switch(item.type) {
+            case 'weapon':
+                this.equipWeapon(item);
+                break;
+        }
+        
+    };
+
+    primaryFirePressed = (event) => {
+        console.log(event);
+        event.downX;
+        event.downY;
+    };
+
+    equipWeapon(weapon) {
+        
     };
 
 }
