@@ -1,4 +1,4 @@
-import * as utils from './utilities.js';
+import utils from './utilities.js';
 import Inventory from './Inventory.js';
 import Weapon from './Weapon.js';
 
@@ -33,16 +33,19 @@ class Player {
             this.addControls();
         } else {
             this.sprite.body.gravity.y = -300;
+            this.sprite.setImmovable(true);
         }
     };
 
     addPhysics() {
-        this.sprite.setCollideWorldBounds(true);
-        this.sprite.setImmovable(true);
 
         if (this.controllable) {
             this.physicsGroup.add(this.sprite);
+        } else {
+            this.otherPlayersGroup.add(this.sprite);
         }
+
+        this.sprite.setCollideWorldBounds(true);
         
         // world objects which the player model should interact with
         for (var i = 0; i < this.config.collideWith.length; i++) {
@@ -55,7 +58,9 @@ class Player {
         var startingX = !isNaN(this.position.x) ? this.position.x : 100;
         var startingY = !isNaN(this.position.y) ? this.position.y : 450;
 
-        this.sprite = this.scene.physics.add.sprite(startingX, startingY, 'dude');
+        // if (this.controllable) {
+            this.sprite = this.scene.physics.add.sprite(startingX, startingY, 'dude');
+        // }
         this.scene.anims.create({
             key: 'left',
             frames: this.scene.anims.generateFrameNumbers('dude', {

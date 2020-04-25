@@ -1,5 +1,6 @@
 import Player from './Player.js';
 import World from './World.js';
+import Level from './Level.js';
 
 
 var config = {
@@ -42,20 +43,33 @@ function preload() {
     );
 }
 
-var platformsGroup;
+// var platformsGroup;
 var playersGroup;
+var otherPlayersGroup;
 
 function create() {
     this.add.image(400, 300, 'sky');
 
-    platformsGroup = this.physics.add.staticGroup();
+    this.physics.world.setBounds(0,0,this.cameras.main.width, this.cameras.main.height);
+    this.physics.world.setBoundsCollision();
+    console.log(this.physics.world.bounds);
+    this.currentLevel = new Level({
+        width: this.width,
+        height: this.height,
+        randomise: true,
+        spawnPoint: {x: 100, y: 100},
+        scene: this
+    });
+
+    // platformsGroup = this.physics.add.staticGroup();
     playersGroup = this.physics.add.group();
+    otherPlayersGroup = this.physics.add.staticGroup();
 
 
-    platformsGroup.create(400, 568, 'ground').setScale(2).refreshBody();
-    platformsGroup.create(600, 400, 'ground');
-    platformsGroup.create(50, 250, 'ground');
-    platformsGroup.create(750, 220, 'ground');
+    // platformsGroup.create(400, 568, 'ground').setScale(2).refreshBody();
+    // platformsGroup.create(600, 400, 'ground');
+    // platformsGroup.create(50, 250, 'ground');
+    // platformsGroup.create(750, 220, 'ground');
 
     createWorldObject.call(this);
     addSocketComms.call(this, socket);
@@ -152,8 +166,9 @@ function addPlayer(playerData, otherPlayer) {
         scene: sceneRef,
         graphics: graphics,
         controllable: !otherPlayer,
+        otherPlayersGroup: otherPlayersGroup,
         physicsGroup: playersGroup,
-        collideWith: [platformsGroup, playersGroup],
+        collideWith: [this.currentLevel.platformsGroup, playersGroup],
         position: playerData.position,
         isLocalUser: !otherPlayer,
         playerId: playerData.playerId,
@@ -162,6 +177,8 @@ function addPlayer(playerData, otherPlayer) {
 
     if (!otherPlayer) {
         currentPlayer = newPlayer;
+        this.cameras.main.startFollow(currentPlayer.sprite, true);
+        this.cameras.main.setZoom(1.1);
     }
 
     return newPlayer;
